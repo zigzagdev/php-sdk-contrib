@@ -7,6 +7,7 @@ namespace OpenFeature\Providers\Split\Test\integration;
 use OpenFeature\Providers\Split\SplitProvider;
 use OpenFeature\Providers\Split\Test\TestCase;
 use OpenFeature\implementation\flags\EvaluationContext;
+use OpenFeature\interfaces\provider\ErrorCode;
 use OpenFeature\interfaces\provider\Provider;
 use Psr\Log\NullLogger;
 
@@ -118,6 +119,32 @@ class SplitProviderTest extends TestCase
 
         // Then
         $this->assertEquals($expectedValue, $actualValue);
+    }
+
+    public function testResolvesIntegerDefaultValueWhenTreatmentIsDecimal(): void
+    {
+        // Given
+        $defaultValue = 0;
+
+        // When
+        $actualDetails = $this->provider->resolveIntegerValue('dev.openfeature.decimal_int_flag', $defaultValue, $this->evaluationContext);
+
+        // Then
+        $this->assertEquals($defaultValue, $actualDetails->getValue());
+        $this->assertEquals(ErrorCode::TYPE_MISMATCH(), $actualDetails->getError()?->getResolutionErrorCode());
+    }
+
+    public function testResolvesIntegerDefaultValueWhenTreatmentIsExponent(): void
+    {
+        // Given
+        $defaultValue = 0;
+
+        // When
+        $actualDetails = $this->provider->resolveIntegerValue('dev.openfeature.exponent_int_flag', $defaultValue, $this->evaluationContext);
+
+        // Then
+        $this->assertEquals($defaultValue, $actualDetails->getValue());
+        $this->assertEquals(ErrorCode::TYPE_MISMATCH(), $actualDetails->getError()?->getResolutionErrorCode());
     }
 
     public function testCanResolveObject(): void
